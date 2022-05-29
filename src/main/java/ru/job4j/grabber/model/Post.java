@@ -81,36 +81,46 @@ public class Post {
                 + '}';
     }
 
-    static class Builder {
+    public static class Builder {
         private int id;
         private String title;
         private String link;
         private String description;
         private LocalDateTime created;
 
-        Builder buildId(int id) {
+        public Builder buildId(int id) {
             this.id = id;
             return this;
         }
 
-        Builder buildTitle(String title) {
+        public Builder buildTitle(String title) {
             this.title = title;
             return this;
         }
 
-        Builder buildLink(String link) {
+        public Builder buildLink(String link) {
             this.link = link;
             return this;
         }
 
-        Builder buildDescription(String description) {
+        public Builder buildDescription(String description) {
             this.description = description;
             return this;
         }
 
-        Builder buildCreated(LocalDateTime created) {
+        public Builder buildCreated(LocalDateTime created) {
             this.created = created;
             return this;
+        }
+
+        public Post build() {
+            Post post = new Post();
+            post.id = id;
+            post.title = title;
+            post.link = link;
+            post.description = description;
+            post.created = created;
+            return post;
         }
     }
 }
