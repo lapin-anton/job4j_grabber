@@ -18,6 +18,8 @@ public class HabrCareerParse implements Parse {
 
     private static final String PAGE_LINK = String.format("%s/vacancies/java_developer?page=", SOURCE_LINK);
 
+    private static final int MAX_PAGES_COUNT = 5;
+
     private final DateTimeParser dateTimeParser;
 
     public HabrCareerParse(DateTimeParser dateTimeParser) {
@@ -28,26 +30,11 @@ public class HabrCareerParse implements Parse {
     public List<Post> list(String link) {
         List<Post> posts = new ArrayList<>();
         try {
-            for (int i = 1; i <= 1; i++) {
+            for (int i = 1; i <= MAX_PAGES_COUNT; i++) {
                 Connection connection = Jsoup.connect(String.format("%s%s", link, i));
                 Document document = connection.get();
                 Elements rows = document.select(".vacancy-card__inner");
-                rows.forEach(row -> {
-                    Element titleElement = row.select(".vacancy-card__title").first();
-                    Element linkElement = titleElement.child(0);
-                    Element dateElement = row.select(".vacancy-card__date").first().child(0);
-                    String vacancyName = titleElement.text();
-                    String vacancyLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
-                    String vacancyCreated = dateElement.attr("datetime");
-                    String vacancyDescription = retrieveDescription(vacancyLink);
-                    Post post = new Post.Builder()
-                            .buildTitle(vacancyName)
-                            .buildLink(vacancyLink)
-                            .buildDescription(vacancyDescription)
-                            .buildCreated(dateTimeParser.parse(vacancyCreated))
-                            .build();
-                    posts.add(post);
-                });
+                rows.forEach(row -> posts.add(getPostFromRow(row)));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -73,5 +60,21 @@ public class HabrCareerParse implements Parse {
             e.printStackTrace();
         }
         return description.toString();
+    }
+
+    private Post getPostFromRow(Element row) {
+        Element titleElement = row.select(".vacancy-card__title").first();
+        Element linkElement = titleElement.child(0);
+        Element dateElement = row.select(".vacancy-card__date").first().child(0);
+        String vacancyName = titleElement.text();
+        String vacancyLink = String.format("%s%s", SOURCE_LINK, linkElement.attr("href"));
+        String vacancyCreated = dateElement.attr("datetime");
+        String vacancyDescription = retrieveDescription(vacancyLink);
+        return new Post.Builder()
+                .buildTitle(vacancyName)
+                .buildLink(vacancyLink)
+                .buildDescription(vacancyDescription)
+                .buildCreated(dateTimeParser.parse(vacancyCreated))
+                .build();
     }
 }
